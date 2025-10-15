@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author HP
@@ -39,14 +41,19 @@ public class ComplaintController {
     }
 
     @PostMapping("/complaint")
-    public ResponseEntity<?> addComplaint(@RequestParam String title, @RequestParam String description,
-                                       @RequestParam float latitude, @RequestParam float longitude
-                                       ,@RequestPart MultipartFile imageFile) throws IOException {
+    public ResponseEntity<Map<String, Object>> addComplaint(@RequestParam String title, @RequestParam String description,
+                                            @RequestParam float latitude, @RequestParam float longitude
+                                       , @RequestPart MultipartFile imageFile) throws IOException {
         System.out.print(title);
         try{
-            
+            // here first send description to gemini and get priority and category then it will be added
             Complaint complaint = service.addComplaint(title,description,latitude,longitude,imageFile);
-            return new ResponseEntity<>(HttpStatus.OK);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", complaint.getId());
+            response.put("category", complaint.getCategory());
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
         catch (Exception e){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
