@@ -27,7 +27,8 @@ public class GeminiService {
                 "Return JSON only in format: {\"category\": \"<category>\", \"priority\": \"<priority>\"}. " +
                 "Complaint: " + description;
 
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + apiKey;
+        System.out.println(apiKey);
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
 
         Map<String, Object> requestBody = Map.of(
                 "contents", new Object[]{
@@ -43,6 +44,7 @@ public class GeminiService {
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+        System.out.println(response.getBody());
 
         // Parse Gemini’s outer response
         JsonNode root = mapper.readTree(response.getBody());

@@ -24,6 +24,22 @@ public class ComplaintController {
     @Autowired
     ComplaintService service;
 
+    @GetMapping("/")
+    public ResponseEntity<Map<String, Object>> home() {
+        Map<String, Object> info = new HashMap<>();
+        info.put("appName", "Urban Eye");
+        info.put("description", "Urban Eye is a smart city complaint management system that uses AI (Gemini) to categorize and prioritize civic issues based on user-submitted reports.");
+        info.put("availableEndpoints", List.of(
+                "GET /complaints - Fetch all complaints",
+                "GET /complaint/{id} - Fetch a specific complaint by ID",
+                "POST /complaint - Submit a new complaint (with image)"
+        ));
+        info.put("version", "1.0.0");
+        info.put("status", "Running");
+
+        return new ResponseEntity<>(info, HttpStatus.OK);
+    }
+
     @GetMapping("/complaints")
     public ResponseEntity<List<Complaint>> getAllComplaints(){
         return new ResponseEntity<>(service.getAllComplaints(), HttpStatus.OK);

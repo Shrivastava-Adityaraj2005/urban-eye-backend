@@ -45,6 +45,7 @@ public class ComplaintService {
             complaint.setCategory(aiResult.optString("category", "Miscellaneous"));
             complaint.setPriority(aiResult.optString("priority", "Medium"));
         } catch (Exception e) {
+            e.printStackTrace();
             complaint.setCategory("Uncategorized");
             complaint.setPriority("Medium");
         }
