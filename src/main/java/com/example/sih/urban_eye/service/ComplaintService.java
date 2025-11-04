@@ -36,9 +36,10 @@ public class ComplaintService {
         complaint.setDescription(description);
         complaint.setLatitude(latitude);
         complaint.setLongitude(longitude);
-        complaint.setImageName(imageFile.getOriginalFilename());
-        complaint.setImageType(imageFile.getContentType());
-        complaint.setImageData(imageFile.getBytes());
+        complaint.setImageUri(imageUrl);
+        // complaint.setImageName(imageFile.getOriginalFilename());
+        // complaint.setImageType(imageFile.getContentType());
+        // complaint.setImageData(imageFile.getBytes());
 
         try {
             JSONObject aiResult = geminiService.analyzeComplaint(description);

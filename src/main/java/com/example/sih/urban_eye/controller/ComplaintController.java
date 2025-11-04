@@ -23,6 +23,8 @@ import java.util.Map;
 public class ComplaintController {
     @Autowired
     ComplaintService service;
+    @Autowired
+    S3Service s3Service;
 
     @GetMapping("/")
     public ResponseEntity<Map<String, Object>> home() {
@@ -63,7 +65,9 @@ public class ComplaintController {
         System.out.print(title);
         try{
             // here first send description to gemini and get priority and category then it will be added
-            Complaint complaint = service.addComplaint(title,description,latitude,longitude,imageFile);
+
+            String imageUrl = s3Service.uploadFile(imageFile);
+            Complaint complaint = service.addComplaint(title,description,latitude,longitude,imageUrl);
 
             Map<String, Object> response = new HashMap<>();
             response.put("id", complaint.getId());
@@ -72,6 +76,8 @@ public class ComplaintController {
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
         catch (Exception e){
+//            e.printStackTrace();
+            System.out.println( "Upload failed: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }

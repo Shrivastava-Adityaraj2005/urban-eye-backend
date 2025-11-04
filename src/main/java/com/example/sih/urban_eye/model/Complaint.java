@@ -20,13 +20,16 @@ public class Complaint {
     private String description;
     private String priority;
     private String category;
-    private String imageName;
-    private String imageType;
-    @Lob
-    private byte[] imageData;
-    @Transient
-    public String getImageBase64() {
-        return imageData != null ? Base64.getEncoder().encodeToString(imageData) : null;
-    }
+
+    private String imageUri;
+
+//    private String imageName;
+//    private String imageType;
+//    @Lob
+//    private byte[] imageData;
+//    @Transient
+//    public String getImageBase64() {
+//        return imageData != null ? Base64.getEncoder().encodeToString(imageData) : null;
+//    }
 
 }
