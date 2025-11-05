@@ -2,10 +2,10 @@ package com.example.sih.urban_eye.controller;
 
 import com.example.sih.urban_eye.model.Complaint;
 import com.example.sih.urban_eye.service.ComplaintService;
+import com.example.sih.urban_eye.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -66,8 +66,8 @@ public class ComplaintController {
         try{
             // here first send description to gemini and get priority and category then it will be added
 
-            String imageUrl = s3Service.uploadFile(imageFile);
-            Complaint complaint = service.addComplaint(title,description,latitude,longitude,imageUrl);
+            String imageUri = s3Service.uploadFile(imageFile);
+            Complaint complaint = service.addComplaint(title,description,latitude,longitude,imageUri);
 
             Map<String, Object> response = new HashMap<>();
             response.put("id", complaint.getId());
