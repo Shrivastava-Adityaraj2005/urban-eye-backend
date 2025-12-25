@@ -3,7 +3,7 @@ package com.example.sih.urban_eye.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-// import java.util.Base64;
+import java.util.Base64;
 
 /**
  * @author HP
@@ -15,6 +15,22 @@ public class Complaint {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     private float latitude;
+    private float longitude;
+    private String title;
+    private String description;
+    private String priority;
+    private String category;
+
+    // private String imageUri;
+
+    private String imageName;
+    private String imageType;
+    @Lob
+    private byte[] imageData;
+    @Transient
+    public String getImageBase64() {
+        return imageData != null ? Base64.getEncoder().encodeToString(imageData) : null;
+    }
 
     public float getLongitude() {
         return longitude;
@@ -72,29 +88,34 @@ public class Complaint {
         this.category = category;
     }
 
-    public String getImageUri() {
-        return imageUri;
+    // public String getImageUri() {
+    //     return imageUri;
+    // }
+
+    // public void setImageUri(String imageUri) {
+    //     this.imageUri = imageUri;
+    // }
+    public String getImageName() {
+        return imageName;
     }
 
-    public void setImageUri(String imageUri) {
-        this.imageUri = imageUri;
+    public void setImageName(String imageName) {
+        this.imageName = imageName;
     }
 
-    private float longitude;
-    private String title;
-    private String description;
-    private String priority;
-    private String category;
+    public String getImageType() {
+        return imageType;
+    }
 
-    private String imageUri;
+    public void setImageType(String imageType) {
+        this.imageType = imageType;
+    }
 
-//    private String imageName;
-//    private String imageType;
-//    @Lob
-//    private byte[] imageData;
-//    @Transient
-//    public String getImageBase64() {
-//        return imageData != null ? Base64.getEncoder().encodeToString(imageData) : null;
-//    }
+    public byte[] getImageData() {
+        return imageData;
+    }
 
+    public void setImageData(byte[] imageData) {
+        this.imageData = imageData;
+    }
 }

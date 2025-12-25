@@ -2,7 +2,6 @@ package com.example.sih.urban_eye.controller;
 
 import com.example.sih.urban_eye.model.Complaint;
 import com.example.sih.urban_eye.service.ComplaintService;
-import com.example.sih.urban_eye.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +17,12 @@ import java.util.Map;
  * @author HP
  **/
 @RestController
+
 //@RequestMapping("/")
 @CrossOrigin
 public class ComplaintController {
     @Autowired
-    ComplaintService service;
-    @Autowired
-    S3Service s3Service;
+    ComplaintService service;    
 
     @GetMapping("/")
     public ResponseEntity<Map<String, Object>> home() {
@@ -66,8 +64,7 @@ public class ComplaintController {
         try{
             // here first send description to gemini and get priority and category then it will be added
 
-            String imageUri = s3Service.uploadFile(imageFile);
-            Complaint complaint = service.addComplaint(title,description,latitude,longitude,imageUri);
+            Complaint complaint = service.addComplaint(title,description,latitude,longitude,imageFile);
 
             Map<String, Object> response = new HashMap<>();
             response.put("id", complaint.getId());
