@@ -14,6 +14,9 @@ public class Complaint {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+    @Column(nullable = false)
+    private String username;
+
     private float latitude;
     private float longitude;
     private String title;

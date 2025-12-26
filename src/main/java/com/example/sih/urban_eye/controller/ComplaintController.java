@@ -1,6 +1,8 @@
 package com.example.sih.urban_eye.controller;
 
+import jakarta.servlet.http.HttpServletRequest; // ⭐ ADDED
 import com.example.sih.urban_eye.model.Complaint;
+import com.example.sih.urban_eye.security.JwtUtil; // ⭐ ADDED
 import com.example.sih.urban_eye.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,16 +15,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author HP
- **/
 @RestController
-
-//@RequestMapping("/")
 @CrossOrigin
 public class ComplaintController {
+
     @Autowired
-    ComplaintService service;    
+    ComplaintService service;
+
+    @Autowired
+    private JwtUtil jwtUtil; // ⭐ ADDED
 
     @GetMapping("/")
     public ResponseEntity<Map<String, Object>> home() {
@@ -39,32 +40,59 @@ public class ComplaintController {
 
         return new ResponseEntity<>(info, HttpStatus.OK);
     }
-
+    // ⭐ UPDATED to return only logged-in user's complaints
     @GetMapping("/complaints")
-    public ResponseEntity<List<Complaint>> getAllComplaints(){
-        return new ResponseEntity<>(service.getAllComplaints(), HttpStatus.OK);
+    public ResponseEntity<List<Complaint>> getAllComplaints(HttpServletRequest request) {
 
-    }
-    @GetMapping("/complaint/{id}")
-    public ResponseEntity<Complaint> getComplaint(@PathVariable int id){
-        Complaint complaint = service.getComplaint(id);
-        if(complaint!=null){
-            return new ResponseEntity<>(complaint, HttpStatus.OK);
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        else{
+
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token); // ⭐ ADDED
+
+        return new ResponseEntity<>(service.getMyComplaints(username), HttpStatus.OK); // ⭐ ADDED
+    }
+
+    @GetMapping("/complaint/{id}")
+    public ResponseEntity<Complaint> getComplaint(@PathVariable int id, HttpServletRequest request) { // ⭐ ADDED request
+
+        Complaint complaint = service.getComplaint(id);
+        if (complaint == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        // ⭐ Check ownership
+        String authHeader = request.getHeader("Authorization");
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+
+        if (!complaint.getUsername().equals(username)) { // ⭐ ADDED
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return new ResponseEntity<>(complaint, HttpStatus.OK);
     }
 
     @PostMapping("/complaint")
-    public ResponseEntity<Map<String, Object>> addComplaint(@RequestParam String title, @RequestParam String description,
-                                            @RequestParam float latitude, @RequestParam float longitude
-                                       , @RequestPart MultipartFile imageFile) throws IOException {
-        System.out.print(title);
-        try{
-            // here first send description to gemini and get priority and category then it will be added
+    public ResponseEntity<Map<String, Object>> addComplaint(
+            HttpServletRequest request, // ⭐ ADDED
+            @RequestParam String title,
+            @RequestParam String description,
+            @RequestParam float latitude,
+            @RequestParam float longitude,
+            @RequestPart MultipartFile imageFile) throws IOException {
 
-            Complaint complaint = service.addComplaint(title,description,latitude,longitude,imageFile);
+        System.out.print(title);
+        try {
+            Complaint complaint = service.addComplaint(title, description, latitude, longitude, imageFile);
+
+            // ⭐ Extract Username from Token & Save
+            String token = request.getHeader("Authorization").substring(7);
+            String username = jwtUtil.extractUsername(token);
+            complaint.setUsername(username);
+            service.saveComplaint(complaint);
 
             Map<String, Object> response = new HashMap<>();
             response.put("id", complaint.getId());
@@ -72,9 +100,8 @@ public class ComplaintController {
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
-        catch (Exception e){
-//            e.printStackTrace();
-            System.out.println( "Upload failed: " + e.getMessage());
+        catch (Exception e) {
+            System.out.println("Upload failed: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
