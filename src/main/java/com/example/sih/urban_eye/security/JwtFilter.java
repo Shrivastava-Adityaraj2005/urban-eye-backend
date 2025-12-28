@@ -1,5 +1,7 @@
 package com.example.sih.urban_eye.security;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,13 +32,29 @@ public class JwtFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
+
             String token = authHeader.substring(7);
-            String username = jwtUtil.extractUsername(token);
+            String username = null;
+
+            try {
+                username = jwtUtil.extractUsername(token);
+
+            } catch (ExpiredJwtException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("JWT expired");
+                return; // stop filter chain
+
+            } catch (JwtException e) { // signature invalid, malformed, etc.
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Invalid JWT token");
+                return; // stop filter chain
+            }
 
             if (username != null &&
                     SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                UserDetails userDetails = new User(username, "", Collections.emptyList());
+                UserDetails userDetails =
+                        new User(username, "", Collections.emptyList());
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
