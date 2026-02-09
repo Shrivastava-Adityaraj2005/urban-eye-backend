@@ -47,6 +47,9 @@ public class ComplaintService {
     }
 
     public List<Complaint> getMyComplaints(String username) {
+        if ("admin".equalsIgnoreCase(username)) {
+            return repo.findAll();
+        }
         return repo.findByUsername(username);
     }
 

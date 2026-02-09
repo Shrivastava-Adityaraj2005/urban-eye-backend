@@ -63,12 +63,11 @@ public class ComplaintController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        // ⭐ Check ownership
         String authHeader = request.getHeader("Authorization");
         String token = authHeader.substring(7);
         String username = jwtUtil.extractUsername(token);
 
-        if (!complaint.getUsername().equals(username)) { // ⭐ ADDED
+        if (!username.equalsIgnoreCase("admin")) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
