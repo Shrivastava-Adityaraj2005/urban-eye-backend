@@ -2,12 +2,13 @@ package com.example.sih.urban_eye.service;
 
 import com.example.sih.urban_eye.model.Complaint;
 import com.example.sih.urban_eye.repository.ComplaintRepo;
+import com.example.sih.urban_eye.repository.TaskRepo;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 import java.util.Optional;
 
 @Service
@@ -15,6 +16,9 @@ public class ComplaintService {
 
     @Autowired
     private ComplaintRepo repo;
+
+    @Autowired
+    private TaskRepo taskRepo;
 
     @Autowired
     private GeminiService geminiService;
@@ -52,9 +56,29 @@ public class ComplaintService {
         }
         return repo.findByUsername(username);
     }
-
     public Complaint getComplaint(int id) {
         Optional<Complaint> comp = repo.findById(id);
         return comp.orElse(null);
+    }
+
+    // worker work
+    public void setAssign(int id){
+        Complaint comp = repo.findById(id).orElse(null);
+        comp.setAssigned(true);
+        repo.save(comp);
+    }
+    public List<Complaint> getNewComplaints(){
+        return repo.findByAssignedIsTrueAndWorkernameIsNull();
+    
+    }
+    public List<Complaint> getOldComplaints(String workername) {
+        return repo.findByWorkername(workername);
+    }
+    public void updateStatus(int id, String status) {
+        Complaint complaint = repo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Complaint not found"));
+
+        complaint.setStatus(status);
+        repo.save(complaint);
     }
 }

@@ -6,8 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ComplaintRepo extends JpaRepository<Complaint, Integer> {
+public interface TaskRepo extends JpaRepository<Complaint, Integer> {
     List<Complaint> findByUsername(String username);
-    List<Complaint> findByWorkername(String workername);
-    List<Complaint> findByAssignedIsTrueAndWorkernameIsNull();
 }

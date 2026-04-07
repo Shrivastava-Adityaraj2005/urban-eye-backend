@@ -15,6 +15,9 @@ public class DataInitializer {
 
     @Value("${admin.password}")
     private String adminPassword;
+    
+    @Value("${db.connect.cmd}")
+    private String dbConnectCmd;
 
     @Autowired
     private PasswordEncoder encoder;
@@ -29,12 +32,15 @@ public class DataInitializer {
                 User admin = new User();
                 admin.setUsername("admin");
                 admin.setPassword(encoder.encode(adminPassword));
+                admin.setRole("admin");
 
                 userRepo.save(admin);
                 System.out.println("Admin user created");
             } else {
                 System.out.println("Admin user already exists");
             }
+            System.out.println("Command to connect to the database:\n" + dbConnectCmd);
+            System.out.println("\n[Server started at PORT 8080]");
         };
     }
 }

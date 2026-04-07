@@ -11,9 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @CrossOrigin
@@ -103,5 +101,67 @@ public class ComplaintController {
             System.out.println("Upload failed: " + e.getMessage());
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
+    @PostMapping("/complaint/assign-task/{id}")
+    public ResponseEntity<?> assignTask(@PathVariable int id){
+        System.out.println(id);
+        service.setAssign(id);
+        return new ResponseEntity<>("Updated",HttpStatus.OK);
+    }
+    //worker routes
+    @GetMapping("/complaints/new-jobs")
+    public ResponseEntity<?> getRadiusComplaint(@RequestParam double lat, @RequestParam double lng) {
+        List<Complaint> newComplaints = service.getNewComplaints();
+        List<Complaint> nearbyComplaints = new ArrayList<>();
+        double radius = 800;
+        for(Complaint c: newComplaints){
+            double dist = Math.sqrt(Math.pow(c.getLatitude()-lat, 2) + Math.pow(c.getLongitude()-lng, 2));
+            if (dist < radius) {
+                nearbyComplaints.add(c);
+            }      
+        }
+
+        return new ResponseEntity<>(nearbyComplaints, HttpStatus.OK);
+    }
+    @GetMapping("/complaints/old-jobs")
+    public ResponseEntity<?> getOldJobs(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        String token = authHeader.substring(7);
+        String username = jwtUtil.extractUsername(token);
+
+        return new ResponseEntity<>(service.getOldComplaints(username), HttpStatus.OK);
+    }
+    @PatchMapping("/complaint/{id}/pending")
+    public ResponseEntity<?> markPending(@PathVariable int id) {
+        service.updateStatus(id, "Pending");
+        return new ResponseEntity<>("Marked as Pending", HttpStatus.OK);
+    }
+
+    @PatchMapping("/complaint/{id}/in-queue")
+    public ResponseEntity<?> markInQueue(@PathVariable int id) {
+        service.updateStatus(id, "In queue");
+        return new ResponseEntity<>("Marked as In Queue", HttpStatus.OK);
+    }
+
+    @PatchMapping("/complaint/{id}/in-progress")
+    public ResponseEntity<?> markInProgress(@PathVariable int id) {
+        service.updateStatus(id, "In progress");
+        return new ResponseEntity<>("Marked as In Progress", HttpStatus.OK);
+    }
+
+    @PatchMapping("/complaint/{id}/under-verification")
+    public ResponseEntity<?> markUnderVerification(@PathVariable int id) {
+        service.updateStatus(id, "Under review");
+        return new ResponseEntity<>("Marked as Under Verification", HttpStatus.OK);
+    }
+
+    @PatchMapping("/complaint/{id}/completed")
+    public ResponseEntity<?> markCompleted(@PathVariable int id) {
+        service.updateStatus(id, "Completed");
+        return new ResponseEntity<>("Marked as Completed", HttpStatus.OK);
     }
 }

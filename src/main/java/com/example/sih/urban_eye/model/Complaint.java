@@ -25,7 +25,10 @@ public class Complaint {
     private String category;
 
     // private String imageUri;
-
+    private String workername;
+    private boolean assigned;
+    private String status = "Pending";
+    
     private String imageName;
     private String imageType;
     @Lob
@@ -120,5 +123,25 @@ public class Complaint {
 
     public void setImageData(byte[] imageData) {
         this.imageData = imageData;
+    }
+
+    public void setWorkerName(String workername){
+        this.workername=workername;
+
+    }
+    public String getWorkerName(){
+        return workername;
+    }
+    public void setAssigned(boolean assigned){
+        this.assigned = assigned;
+    }
+    public boolean getAssigned(){
+        return assigned;
+    }
+    public void setStatus(String status){
+        this.status = status;
+    }
+    public String getStatus(){
+        return status;
     }
 }
