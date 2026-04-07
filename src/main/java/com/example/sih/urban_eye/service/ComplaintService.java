@@ -24,15 +24,14 @@ public class ComplaintService {
     private GeminiService geminiService;
 
     // Create complaint but DO NOT save yet (username will be set in controller)
-    public Complaint addComplaint(String title, String description, float latitude, float longitude, MultipartFile imageFile) throws IOException {
+    public Complaint addComplaint(String title, String description, float latitude, float longitude, String imageUri, String publicId) throws IOException {
         Complaint complaint = new Complaint();
         complaint.setTitle(title);
         complaint.setDescription(description);
         complaint.setLatitude(latitude);
         complaint.setLongitude(longitude);
-        complaint.setImageName(imageFile.getOriginalFilename());
-        complaint.setImageType(imageFile.getContentType());
-        complaint.setImageData(imageFile.getBytes());
+        complaint.setImageUri(imageUri);
+        complaint.setPublicId(publicId);
 
         try {
             JSONObject aiResult = geminiService.analyzeComplaint(description);

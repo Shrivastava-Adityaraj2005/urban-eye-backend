@@ -1,13 +1,15 @@
 package com.example.sih.urban_eye.controller;
 
-import jakarta.servlet.http.HttpServletRequest; // ⭐ ADDED
+import com.cloudinary.Cloudinary;
+import jakarta.servlet.http.HttpServletRequest; 
 import com.example.sih.urban_eye.model.Complaint;
-import com.example.sih.urban_eye.security.JwtUtil; // ⭐ ADDED
+import com.example.sih.urban_eye.security.JwtUtil; 
 import com.example.sih.urban_eye.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -21,7 +23,19 @@ public class ComplaintController {
     ComplaintService service;
 
     @Autowired
-    private JwtUtil jwtUtil; // ⭐ ADDED
+    private JwtUtil jwtUtil; 
+
+    @Autowired
+    private Cloudinary cloudinary;
+
+    @Value("${cloudinary.cloud.name}")
+    private String cloudinaryCloudName;
+
+    @Value("${cloudinary.api.key}")
+    private String cloudinaryApikey;
+
+    @Value("${cloudinary.api.secret}")
+    private String cloudinaryApiSecret;
 
     @GetMapping("/")
     public ResponseEntity<Map<String, Object>> home() {
@@ -73,17 +87,20 @@ public class ComplaintController {
     }
 
     @PostMapping("/complaint")
-    public ResponseEntity<Map<String, Object>> addComplaint(
-            HttpServletRequest request, // ⭐ ADDED
-            @RequestParam String title,
-            @RequestParam String description,
-            @RequestParam float latitude,
-            @RequestParam float longitude,
-            @RequestPart MultipartFile imageFile) throws IOException {
+    public ResponseEntity<?> addComplaint(
+            HttpServletRequest request,
+            @RequestBody Map<String, Object> body) {
+
+        String title = (String) body.get("title");
+        String description = (String) body.get("description");
+        float latitude = Float.parseFloat(body.get("latitude").toString());
+        float longitude = Float.parseFloat(body.get("longitude").toString());
+        String imageUri = (String) body.get("imageUri");
+        String publicId = (String) body.get("publicId");
 
         System.out.print(title);
         try {
-            Complaint complaint = service.addComplaint(title, description, latitude, longitude, imageFile);
+            Complaint complaint = service.addComplaint(title, description, latitude, longitude, imageUri, publicId);
 
             // ⭐ Extract Username from Token & Save
             String token = request.getHeader("Authorization").substring(7);
@@ -163,5 +180,25 @@ public class ComplaintController {
     public ResponseEntity<?> markCompleted(@PathVariable int id) {
         service.updateStatus(id, "Completed");
         return new ResponseEntity<>("Marked as Completed", HttpStatus.OK);
+    }
+
+    @GetMapping("cloudinary/generate-signature")
+    public ResponseEntity<?> generateSignature() {
+
+        long timestamp = System.currentTimeMillis() / 1000;
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("timestamp", timestamp);
+        params.put("folder", "urban-eye");
+
+        String signature = cloudinary.apiSignRequest(params, cloudinaryApiSecret);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", timestamp);
+        response.put("signature", signature);
+        response.put("apiKey", cloudinaryApikey);
+        response.put("cloudName", cloudinaryCloudName);
+        response.put("folder", "urban-eye");
+        return ResponseEntity.ok(response);
     }
 }
