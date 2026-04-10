@@ -26,6 +26,8 @@ public class Complaint {
 
     private String imageUri;
     private String publicId;
+    private String finalImageUri;
+    private String finalPublicId;
     private String workername;
     private boolean assigned;
     private String status = "Pending";
@@ -101,6 +103,13 @@ public class Complaint {
 
     public void setImageUri(String imageUri) {
         this.imageUri = imageUri;
+    }
+    public String getFinalImageUri() {
+        return finalImageUri;
+    }
+
+    public void setFinalImageUri(String finalImageUri) {
+        this.finalImageUri = finalImageUri;
     }
     public String getPublicId(){
         return publicId;

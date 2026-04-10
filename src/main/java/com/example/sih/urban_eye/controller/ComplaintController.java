@@ -111,6 +111,7 @@ public class ComplaintController {
             Map<String, Object> response = new HashMap<>();
             response.put("id", complaint.getId());
             response.put("category", complaint.getCategory());
+            response.put("status", complaint.getStatus());
 
             return new ResponseEntity<>(response, HttpStatus.OK);
         }
@@ -152,33 +153,44 @@ public class ComplaintController {
 
         return new ResponseEntity<>(service.getOldComplaints(username), HttpStatus.OK);
     }
-    @PatchMapping("/complaint/{id}/pending")
-    public ResponseEntity<?> markPending(@PathVariable int id) {
-        service.updateStatus(id, "Pending");
-        return new ResponseEntity<>("Marked as Pending", HttpStatus.OK);
-    }
-
+    
     @PatchMapping("/complaint/{id}/in-queue")
     public ResponseEntity<?> markInQueue(@PathVariable int id) {
-        service.updateStatus(id, "In queue");
+        service.updateStatus(id, "In Queue");
         return new ResponseEntity<>("Marked as In Queue", HttpStatus.OK);
     }
 
-    @PatchMapping("/complaint/{id}/in-progress")
-    public ResponseEntity<?> markInProgress(@PathVariable int id) {
-        service.updateStatus(id, "In progress");
-        return new ResponseEntity<>("Marked as In Progress", HttpStatus.OK);
-    }
+    @PatchMapping("/complaint/grab-job")
+    public ResponseEntity<?> markInProgress(@RequestBody Map<String, Object> body) {
 
-    @PatchMapping("/complaint/{id}/under-verification")
-    public ResponseEntity<?> markUnderVerification(@PathVariable int id) {
-        service.updateStatus(id, "Under review");
+        Integer id = (Integer) body.get("complaintId");
+        String workername = (String) body.get("workername");
+
+        if (id == null || workername == null) {
+            return ResponseEntity.badRequest().body("Missing fields");
+        }
+
+        service.updateStatus(id, "In Progress");
+        service.updateName(id, workername);
+
+        return ResponseEntity.ok("Marked as In Progress");
+    }
+    @PatchMapping("/complaint/submit-work")
+    public ResponseEntity<?> markUnderVerification(@RequestBody Map<String, Object> body) {
+        Integer complaintId = (Integer) body.get("complaintId");
+        String imageUri = (String) body.get("imageUri");
+        String publicId = (String) body.get("publicId");
+
+        service.updateStatus(complaintId, "Under review");
+        service.updateFinalImageUri(complaintId, imageUri);
+        service.updateFinalPublicId(complaintId, publicId);
         return new ResponseEntity<>("Marked as Under Verification", HttpStatus.OK);
     }
 
-    @PatchMapping("/complaint/{id}/completed")
-    public ResponseEntity<?> markCompleted(@PathVariable int id) {
-        service.updateStatus(id, "Completed");
+    @PatchMapping("/complaint/verify")
+    public ResponseEntity<?> markCompleted(@RequestBody Map<String, Object> body) {
+        Integer complaintId = (Integer) body.get("complaintId");
+        service.updateStatus(complaintId, "Completed");
         return new ResponseEntity<>("Marked as Completed", HttpStatus.OK);
     }
 

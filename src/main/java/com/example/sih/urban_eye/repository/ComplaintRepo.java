@@ -9,5 +9,5 @@ import java.util.List;
 public interface ComplaintRepo extends JpaRepository<Complaint, Integer> {
     List<Complaint> findByUsername(String username);
     List<Complaint> findByWorkername(String workername);
-    List<Complaint> findByAssignedIsTrueAndWorkernameIsNull();
+    List<Complaint> findByStatus(String status);
 }

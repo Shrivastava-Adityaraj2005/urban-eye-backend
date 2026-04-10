@@ -67,17 +67,44 @@ public class ComplaintService {
         repo.save(comp);
     }
     public List<Complaint> getNewComplaints(){
-        return repo.findByAssignedIsTrueAndWorkernameIsNull();
+        return repo.findByStatus("In Queue");
     
     }
     public List<Complaint> getOldComplaints(String workername) {
         return repo.findByWorkername(workername);
+    }
+    public void updateWorkerDetails(int id, String workername) {
+        
+        Complaint complaint = repo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Complaint not found with id: " + id));
+
+        
+        complaint.setWorkerName(workername);
+        complaint.setStatus("In Progress");
+        repo.save(complaint);
     }
     public void updateStatus(int id, String status) {
         Complaint complaint = repo.findById(id)
             .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
         complaint.setStatus(status);
+        repo.save(complaint);
+    }
+    public void updateName(int id, String workername){
+    Complaint complaint = repo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Complaint not found"));
+
+            complaint.setWorkerName(workername);
+            repo.save(complaint);
+    }
+    public void updateFinalImageUri(int id, String imageUri){
+        Complaint complaint = repo.findById(id).orElseThrow(() -> new RuntimeException("Complaint not found"));
+        complaint.setFinalImageUri(imageUri);
+        repo.save(complaint);
+    }
+    public void updateFinalPublicId(int id, String publicId) {
+        Complaint complaint = repo.findById(id).orElseThrow(() -> new RuntimeException("Complaint not found"));
+        complaint.setFinalPublicId(publicId);
         repo.save(complaint);
     }
 }
