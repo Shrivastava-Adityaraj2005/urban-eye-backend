@@ -181,7 +181,7 @@ public class ComplaintController {
         String imageUri = (String) body.get("imageUri");
         String publicId = (String) body.get("publicId");
 
-        service.updateStatus(complaintId, "Under review");
+        service.updateStatus(complaintId, "Under Review");
         service.updateFinalImageUri(complaintId, imageUri);
         service.updateFinalPublicId(complaintId, publicId);
         return new ResponseEntity<>("Marked as Under Verification", HttpStatus.OK);
